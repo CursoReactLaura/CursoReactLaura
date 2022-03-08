@@ -5,24 +5,26 @@
  * Generated with the TypeScript template
  * https://github.com/react-native-community/react-native-template-typescript
  *
- * @format
+ * Practica 3. Estado 1
  */
 
 import React from 'react';
-import { Text, TouchableHighlight, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-const Button = () => (
-  <TouchableHighlight style={{ borderColor: "red"}}>
-    <Text>Hello World =) </Text>
-  </TouchableHighlight>
-)
 
 function App() {
+  const state = {
+      year : 2016,
+      name: 'Nader Dabit',
+      colors: ['blue']
+
+  }
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center"}}>
-      <Text>
-        Ahora es una prueba online de Laura con botones :)
-      </Text>
+    <View>
+      <Text> My name is: {state.name} </Text>
+      <Text> My name is: {state.name} </Text>
+      <Text> The year is: {state.year}</Text>
+      <Text> My colors are {state.colors[0]}</Text>
     </View>
   );
 }
