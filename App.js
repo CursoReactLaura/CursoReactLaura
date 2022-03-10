@@ -1,96 +1,78 @@
-import React, { Component } from 'react'
-import { View, ScrollView, StyleSheet } from 'react-native'
-import Heading from './Heading'
-import Input from './Input'
-import Button from './Button'
-import TodoList from './TodoList'
-import TabBar from './TabBar'
+import React, { Component } from 'react';
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  AsyncStorage
+} from 'react-native';
 
-let todoIndex = 0
+import Tabs from './src'
 
-class App extends Component {
+const key = 'state'
 
-    constructor() {
-        super()
-        this.state = {
-            inputValue: '',
-            todos: [],
-            type: 'All'
-        }
-        this.toggleComplete = this.toggleComplete.bind(this)
-        this.deleteTodo = this.deleteTodo.bind(this)
-        this.setType = this.setType.bind(this)
-        this.submitTodo = this.submitTodo.bind(this)
+const initialState = [{
+  city: 'Paris',
+  country: 'France',
+  id: 0,
+  locations: []
+},
+{
+  city: 'Tokyo',
+  country: 'Japan',
+  id: 1,
+  locations: []
+}]
+
+export default class App extends Component {
+  state = {
+    cities: []
+  }
+  async componentDidMount() {
+    try {
+      let cities = await AsyncStorage.getItem(key)
+      cities = JSON.parse(cities)
+      this.setState({ cities })
+    } catch (e) {
+      console.log('error from AsyncStorage: ', e)
     }
-
-    inputChange(inputValue) {
-        this.setState({ inputValue })
-    }
-
-    submitTodo() {
-        if (this.state.inputValue.match(/^\s*$/)) return
-        let todo = { title: this.state.inputValue, todoIndex: todoIndex, complete: false }
-        todoIndex++
-        this.state.todos.push(todo)
-        this.setState({ todos: this.state.todos, inputValue: '' }, () => {
-            console.log('State: ', this.state)
-        })
-    }
-
-    deleteTodo(todoIndex) {
-        let { todos } = this.state
-        todos = this.state.todos.filter((todo) => {
-            return todo.todoIndex !== todoIndex
-        })
-        this.setState({ todos })
-    }
-
-    toggleComplete(todoIndex) {
-        let { todos } = this.state
-        todos.forEach((todo) => {
-            if (todo.todoIndex === todoIndex) {
-                todo.complete = !todo.complete
-            }
-        })
-        this.setState({ todos })
-    }
-
-    setType(type) {
-        this.setState({ type })
-    }
-
-    render() {
-        const { todos, inputValue, type } = this.state
-        return ( 
-	<View style = { styles.container } >
-           	<ScrollView keyboardShouldPersistTaps = 'always'
-            	style = { styles.content } >
-            		<Heading/>
-            		<Input inputValue = { inputValue }
-            		inputChange = {
-                	(text) => this.inputChange(text) }
-            		/> 
-			<TodoList type = { type }
-            		toggleComplete = { this.toggleComplete }
-            		deleteTodo = { this.deleteTodo }
-            		todos = { todos } /> 
-			<Button submitTodo = { this.submitTodo }/> 
-		</ScrollView> 
-		<TabBar type = { type }
-            	setType = { this.setType }/> 
-	</View>
-        )
-    }
+  }
+  addCity = (city) => {
+    const cities = this.state.cities
+    cities.push(city)
+    this.setState({ cities })
+    AsyncStorage.setItem(key, JSON.stringify(cities))
+      .then(() => console.log('storage updated!'))
+      .catch(e => console.log('e: ', e))
+  }
+  addLocation = (location, city) => {
+    const index = this.state.cities.findIndex(item => {
+      return item.id === city.id
+    })
+    const chosenCity = this.state.cities[index]
+    chosenCity.locations.push(location)
+    const cities = [
+      ...this.state.cities.slice(0, index),
+      chosenCity,
+      ...this.state.cities.slice(index + 1)
+    ]
+    this.setState({
+      cities
+    }, () => {
+      AsyncStorage.setItem(key, JSON.stringify(cities))
+        .then(() => console.log('storage updated!'))
+        .catch(e => console.log('e: ', e))
+      })
+  }
+  render() {
+    return (
+      <Tabs
+        screenProps={{
+          cities: this.state.cities,
+          addCity: this.addCity,
+          addLocation: this.addLocation
+        }}
+      />
+    )
+  }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#f5f5f5',
-        flex: 1
-    },
-    content: {
-        flex: 1
-    }
-})
-
-export default App
