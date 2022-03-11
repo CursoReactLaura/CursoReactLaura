@@ -1,4 +1,4 @@
 import { AppRegistry } from 'react-native';
-import App from './App';
+import App from './AnimatedStagger';
 
-AppRegistry.registerComponent('RNRedux', () => App);
+AppRegistry.registerComponent('Animations', () => App);
